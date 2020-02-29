@@ -142,6 +142,7 @@ const Tetris = () => {
           ...scoresubmit,
           score: `${score}`
         })
+        cargarTabla()
       }
       updatePlayerPos({ x: 0, y: 0, collided: true });
     }
