@@ -32,42 +32,53 @@ const Tetris = () => {
   const [cargando, setCargando] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  useEffect(()=>{
-    async function cargarTabla(){
-      if (cargando){
-        return
-      }
-        try {
-            setCargando(true)
-            const { data: resultado } = await Axios.get(`https://sjotetris.herokuapp.com/leaderboard`)
-            setTabla({
-                resultado
-            })
-            console.log(tabla)
-            setCargando(false)
-        } catch (error){
-            console.log(error)
-            setCargando(false)
-        }
+  async function cargarTabla() {
+    if (cargando) {
+      return
     }
+    try {
+      setCargando(true)
+      const { data: resultado } = await Axios.get(`https://sjotetris.herokuapp.com/leaderboard`)
+      setTabla({
+        resultado
+      })
+      console.log("refreshing leaderboard", tabla)
+      setCargando(false)
+    } catch (error) {
+      console.error(error)
+      setCargando(false)
+    }
+  }
+  useEffect(() => {
+    // Refresh the leaderboard at the start
     cargarTabla()
-}, [cargando, tabla])
+
+    // Refresh every two minutes
+    const interval = setInterval(() => {
+      cargarTabla()
+    }, 1200000);
+    return () => clearInterval(interval);
+  }, [])
+
   async function handleSubmit(e){
     if (submitting){
       return
     }
-    e.preventDefault();
-    
+    e.preventDefault()
+
+    // Reload leaderboard on submit
+    cargarTabla()
+
     try {
       setSubmitting(true)
       await Axios.post(`https://sjotetris.herokuapp.com/leaderboard`, scoresubmit);
       setSubmitting(false)
       setSubmitted(true)
     } catch (error){
-        console.log(error)
-        setSubmitting(false)
+      console.log(error)
+      setSubmitting(false)
     }
-}
+  }
 
   function handleInputChange(e){
 
@@ -78,7 +89,7 @@ const Tetris = () => {
     })
     console.log(scoresubmit)
   }
-  
+
 
   const movePlayer = dir => {
     if (!checkCollision(player, stage, { x: dir, y: 0 })) {
@@ -162,42 +173,42 @@ const Tetris = () => {
       }
     }
   };
-  
+
   return (
-    <StyledTetrisWrapper
-      role="button"
-      tabIndex="0"
-      onKeyDown={e => move(e)}
-      onKeyUp={keyUp}
-    >
+      <StyledTetrisWrapper
+    role="button"
+    tabIndex="0"
+    onKeyDown={e => move(e)}
+    onKeyUp={keyUp}
+      >
       <StyledTetris>
-        <Stage stage={stage} />
-        <aside>
-          {gameOver ? (
-            <div>
-            <Display gameOver={gameOver} text="Game Over" />
-            <Display text={`Score: ${score}`} />
-            {submitted ? null : <form onSubmit={handleSubmit}>
-            <Display2 handleInputChange={handleInputChange} scoresubmit={scoresubmit}></Display2>
-            <StartButton2></StartButton2>
-            </form>}
-            </div>
-          ) : (
-            <div>
-              <Display text={`Score: ${score}`} />
-              <Display text={`rows: ${rows}`} />
-              <Display text={`Level: ${level}`} />
-            </div>
-          )}
-          <StartButton callback={startGame} />
-        </aside>
-        {!tabla ? 
-        null
-        : 
-        <Stage2 stage={stage} tabla={tabla}></Stage2> 
-        }
-      </StyledTetris>
-      
+      <Stage stage={stage} />
+      <aside>
+      {gameOver ? (
+          <div>
+          <Display gameOver={gameOver} text="Game Over" />
+          <Display text={`Score: ${score}`} />
+          {submitted ? null : <form onSubmit={handleSubmit}>
+           <Display2 handleInputChange={handleInputChange} scoresubmit={scoresubmit}></Display2>
+           <StartButton2></StartButton2>
+           </form>}
+        </div>
+      ) : (
+          <div>
+          <Display text={`Score: ${score}`} />
+          <Display text={`rows: ${rows}`} />
+          <Display text={`Level: ${level}`} />
+          </div>
+      )}
+      <StartButton callback={startGame} />
+      </aside>
+      {!tabla ?
+       null
+       :
+       <Stage2 stage={stage} tabla={tabla}></Stage2>
+      }
+    </StyledTetris>
+
 
     </StyledTetrisWrapper>
   );
