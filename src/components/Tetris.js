@@ -66,12 +66,13 @@ const Tetris = () => {
     }
     e.preventDefault()
 
-    // Reload leaderboard on submit
-    cargarTabla()
+    
 
     try {
       setSubmitting(true)
       await Axios.post(`https://sjotetris.herokuapp.com/leaderboard`, scoresubmit);
+      // Reload leaderboard on submit
+    cargarTabla()
       setSubmitting(false)
       setSubmitted(true)
     } catch (error){
